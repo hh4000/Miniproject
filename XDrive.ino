@@ -41,7 +41,7 @@ void distCal(double dist) {
   if (dist < 0) f = -1;
   if (XYdicration == true) {
 
-    count = (((dist*0.785) * 900) / (PI * 3, 9)); // 0,785 er en værdi der ganges med fordi det virker
+    count = dist*78.5; //Don't ask, it just works
 
     
     //Serial.println((String)count);
