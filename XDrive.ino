@@ -36,34 +36,27 @@ void loop() {
 
 
 void distCal(double dist) {
+  resetEncoders();
+  int f = 1;
+  if (dist < 0) f = -1;
   if (XYdicration == true) {
 
     count = (((dist*0.785) * 900) / (PI * 3, 9)); // 0,785 er en værdi der ganges med fordi det virker
 
     
-    Serial.println((String)count);
-    Serial.println("Encoder1 count = " + (String)EncoderCount);
-    while(EncoderCount < count) {
-      
-      getEncoder();    
-      motors.setSpeeds(105,100);
+    //Serial.println((String)count);
+    //Serial.println("Encoder1 count = " + (String)EncoderCount);
+    while(f*encoders.getCountsRight()< f*count) {   
+      motors.setSpeeds(f*111,f*100);
     }
       Serial.println("Kør");
       motors.setSpeeds(0, 0);
-    
-
-  }
+      
+    }
 
 
 }
 
-void getEncoder() {
-  int countsR= countsR += encoders.getCountsRight();
-  int countsL= countsL += encoders.getCountsLeft();
-  EncoderCount = ((countsR + countsL) / 2) ;  
-  return EncoderCount;
-  resetEncoders();
-}
 void resetEncoders() {
   encoders.getCountsAndResetLeft();
   encoders.getCountsAndResetRight();
