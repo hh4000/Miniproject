@@ -40,7 +40,9 @@ void proxSensor() {
   //Remember to turn on linesensors with "lineSensors.emittersOn()", if linesensors are needed again
   proxSensors.read();
 
+/*
   //Just visual
+
   //  Serial.println(proxSensors.countsFrontWithLeftLeds());
   //  Serial.println(proxSensors.countsFrontWithRightLeds());
   //  lcd.setCursor(0, 0);
@@ -52,7 +54,7 @@ void proxSensor() {
   //  lcd.print(proxSensors.countsFrontWithLeftLeds());
   //  lcd.setCursor(7, 1);
   //  lcd.print(proxSensors.countsFrontWithRightLeds());
-
+*/
 
   //This determance if there is a can in front of the zumo and if there is, then the size of it
   //It uses the data from the IR sensor, to determan how close the can is
