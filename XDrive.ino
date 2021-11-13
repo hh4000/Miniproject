@@ -61,3 +61,12 @@ void resetEncoders() {
   encoders.getCountsAndResetLeft();
   encoders.getCountsAndResetRight();
 }
+
+void turnDegrees(int angle){
+    int f = 0;
+    if(angle<0)f=-1;
+    double dist = 4.05*angle*PI/180;
+    count = dist*78.5;
+    while (f*encoders.getCountsRight()< f*count) motors.setSpeeds(f*-111,f*100);
+    motors.setSpeeds(0,0);
+}
