@@ -48,13 +48,8 @@ void distCal(double dist) {
 
 }
 
-void getEncoder() {
-  int countsR= countsR += encoders.getCountsRight();
-  int countsL= countsL += encoders.getCountsLeft();
-  EncoderCount = ((countsR + countsL) / 2) ;  
-  return EncoderCount;
-  resetEncoders();
-}
+
+
 void resetEncoders() {
   encoders.getCountsAndResetLeft();
   encoders.getCountsAndResetRight();
