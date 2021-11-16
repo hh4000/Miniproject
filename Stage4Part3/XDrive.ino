@@ -5,31 +5,38 @@
 double count = 0;
 
 void distCal(double dist) {
+  //resets encoders to avoid encoder counts for e.g. turns
   resetEncoders();
+  //factor so that it can drive backwards
   int f = 1;
   if (dist < 0) f = -1;
     
     count = dist*78.5; //Don't ask, it just works
+    //Following code prints on the lcd, the distance it is driving in cm
     lcd.gotoXY(0,0);
     lcd.print("Driving");
     lcd.gotoXY(0,1);
     lcd.print((String)dist + " cm");
     
-    //Serial.println((String)count);
-    //Serial.println("Encoder1 count = " + (String)EncoderCount);
+    //actual function
     while(f*encoders.getCountsRight()< f*count) {   
-      motors.setSpeeds(f*100,f*100);
+      motors.setSpeeds(f*100,f*100);//standard speed
+      //if loop so that it avoids driving unevenly 
       if(encoders.getCountsRight()*1.01 > encoders.getCountsLeft()){
-        motors.setSpeeds(f*300,f*100);
+        // when right counter is higher, the left motor goes to 300 speed for a moment to even out
+        motors.setSpeeds(f*300,f*100); 
+
       } else if (encoders.getCountsRight()*1.01 < encoders.getCountsLeft()){
+        //Same as above but with other motor
         motors.setSpeeds(f*100,f*300);
       }
     } 
+    //stops driving and clears LCD
     motors.setSpeeds(0, 0);
     lcd.clear();
 }
 
-void resetEncoders() {
+void resetEncoders() {//Function to reset encoders
   encoders.getCountsAndResetLeft();
   encoders.getCountsAndResetRight();
 }
