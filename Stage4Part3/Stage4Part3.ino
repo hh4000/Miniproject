@@ -6,68 +6,30 @@ Zumo32U4IMU imu;
 Zumo32U4ButtonA buttonA;
 Zumo32U4Encoders encoders;
 Zumo32U4Motors motors;
-
-
-double xdist = 10;
-double ydist = 10;
-double count = 0;
-bool XYdicration = true; //true for x og false for y
-double EncoderCount = 0;
-
-
-
-struct lokation {
-  int xvalue;
-  int yvalue;
-};
+Zumo32U4Buzzer buzzer;
 
 
 void setup() {
-  Serial.begin(9600);
-
+  Serial.println(9600);
+  turnSensorSetup();
+  delay(500);
+  turnSensorReset();
+  lcd.clear();
+  lcd.print("Press A");
+  buttonA.waitForPress();
+  lcd.clear();
+  buzzer.playNote(NOTE_A(4),200,15);
+  delay(500);
 }
 
 void loop() {
-  distCal(10);
-  turnDegrees(-90);
-  distcal(20);
-  turnDegrees(90)
-  distcal(5);
-  turnDegrees(90);
-  distcal(20);
-  turnDegrees(90);
-  distcal(15);
-  turnDegrees(180);
-  
+  checkturn(-180);
+  distCal(45);
+  checkturn(-90);
+  distCal(20);
+  checkturn(-90);
+  lcd.clear();
+  lcd.print("Done");
+  delay(30000);
 
-}
-
-
-void distCal(double dist) {
-  resetEncoders();
-  int f = 1;
-  if (dist < 0) f = -1;
-  if (XYdicration == true) {
-
-    count = dist*78.5; //Don't ask, it just works
-
-    
-    //Serial.println((String)count);
-    //Serial.println("Encoder1 count = " + (String)EncoderCount);
-    while(f*encoders.getCountsRight()< f*count) {   
-      motors.setSpeeds(f*111,f*100);
-    }
-      Serial.println("Kør");
-      motors.setSpeeds(0, 0);
-      
-    }
-
-
-}
-
-
-
-void resetEncoders() {
-  encoders.getCountsAndResetLeft();
-  encoders.getCountsAndResetRight();
 }

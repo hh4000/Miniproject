@@ -1,17 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <Zumo32U4.h>
-Zumo32U4LCD lcd;
-Zumo32U4IMU imu;
-Zumo32U4ButtonA buttonA;
-Zumo32U4Encoders encoders;
-Zumo32U4Motors motors;
-
-double xdist = 10;
-double ydist = 10;
-double count = 0;
-double EncoderCount = 0;
-
 
 /* turnAngle is a 32-bit unsigned integer representing the amount
   the robot has turned since the last time turnSensorReset was
@@ -50,79 +39,34 @@ bool turned90       = false;
 
 
 
-void setup() 
-{
-  Serial.begin(9600);
-  turnSensorSetup();
-  delay(500);
-  turnSensorReset();
-  lcd.clear();
-  delay(500);
-  
-}
-
-/*This is the entire main loop, the loop only relies on 5 functions and works as intented
-*/
-void loop() 
-{
-  /*
-  imustart();
-  checkxdriven();
-  checkturn90();
-  checkydriven();
-  checkturnminus90();
-  */
-  pathFinding();
-  
-}
-
-
-
-void checkxdriven()
-{
-  while(xdriven==false)
-  {
-    distDriveX(xdist);   
-  }
-}
 
 
 //This function checks whether xdriven is true. if it is it turns a specified number of degrees in a certain direction
 
 void checkturn(int angle)
 {
+  bool done = false;
   int f = 1;
   if(angle<0) f = -1; 
-  while(xdriven==true)
+  while(done==false)
   {
-    if(turnAngleDegrees >= angle - 1&& angle + 1>= turnAngleDegrees)
+    if(turnAngleDegrees >= angle && angle + 1>= turnAngleDegrees)
     {
       motors.setSpeeds(0, 0);
-      turned90=true;
-      xdriven=false;
+      done=true;
       imustart();
     }
     else
     {
-      motors.setSpeeds(f*-150, f*150);
+      motors.setSpeeds(f*-100, f*100);
       imustart();
     }
   }
   turnSensorReset();
+  turnAngleDegrees = 0;
 }
 
 
-//Same as the checkydriven just for the y coordinate.
-void checkydriven()
-{
-  while(turned90==true)
-  {
-    distDriveY(ydist);
-    ydriven=true;
-    turned90=false;
-    imustart();
-  }
-}
 
 
 ///This is important for the turn sensor and the lcd screen.
@@ -137,12 +81,6 @@ void imustart()
 
 
 
-//Resets the encoders
-void resetEncoders() 
-{
-  encoders.getCountsAndResetLeft();
-  encoders.getCountsAndResetRight();
-}
 
 
 //Ik rør ved noget herefter, dette er alt sammen Carlos kode der bliver brugt til gyro
