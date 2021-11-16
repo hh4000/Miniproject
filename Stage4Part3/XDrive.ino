@@ -1,11 +1,11 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <Zumo32U4.h>
-Zumo32U4LCD lcd;
-Zumo32U4IMU imu;
-Zumo32U4ButtonA buttonA;
-Zumo32U4Encoders encoders;
-Zumo32U4Motors motors;
+//Zumo32U4LCD lcd;
+//Zumo32U4IMU imu;
+//Zumo32U4ButtonA buttonA;
+//Zumo32U4Encoders encoders;
+//Zumo32U4Motors motors;
 
 
 double xdist = 10;
@@ -22,7 +22,7 @@ struct lokation {
 };
 
 
-void setup() {
+/*void setup() {
   Serial.begin(9600);
 
 }
@@ -32,7 +32,7 @@ void loop() {
   delay(1000);
   distCal(xdist);
 
-}
+}*/
 
 
 void distCal(double dist) {
@@ -40,18 +40,25 @@ void distCal(double dist) {
   int f = 1;
   if (dist < 0) f = -1;
   if (XYdicration == true) {
-
+    
     count = dist*78.5; //Don't ask, it just works
-
+    lcd.gotoXY(0,0);
+    lcd.print("Driving");
+    lcd.gotoXY(0,1);
+    lcd.print((String)dist + " cm");
     
     //Serial.println((String)count);
     //Serial.println("Encoder1 count = " + (String)EncoderCount);
     while(f*encoders.getCountsRight()< f*count) {   
-      motors.setSpeeds(f*111,f*100);
-    }
-      Serial.println("Kør");
+      motors.setSpeeds(f*100,f*100);
+      if(encoders.getCountsRight()*1.01 > encoders.getCountsLeft()){
+        motors.setSpeeds(f*300,f*100);
+      } else if (encoders.getCountsRight()*1.01 < encoders.getCountsLeft()){
+        motors.setSpeeds(f*100,f*300);
+      }
+    } 
       motors.setSpeeds(0, 0);
-      
+      lcd.clear();
     }
 
 
@@ -62,11 +69,3 @@ void resetEncoders() {
   encoders.getCountsAndResetRight();
 }
 
-void turnDegrees(int angle){
-    int f = 0;
-    if(angle<0)f=-1;
-    double dist = 4.05*angle*PI/180;
-    count = dist*78.5;
-    while (f*encoders.getCountsRight()< f*count) motors.setSpeeds(f*-111,f*100);
-    motors.setSpeeds(0,0);
-}
