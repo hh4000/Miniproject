@@ -8,13 +8,15 @@ Zumo32U4Motors motors;
 Zumo32U4Encoders encoders;
 Zumo32U4IMU imu;
 
-#define NUM_SENSORS 3
+#define NUM_SENSORS 5
 uint16_t lineSensorValues[NUM_SENSORS];
 bool useEmitters = true;
 bool completed = false;
 struct LineSensorsWhite { // True if White, False if Black
   bool L;
+  bool LC;
   bool C;
+  bool RC;
   bool R;
 };
 
@@ -26,7 +28,7 @@ int smallCan = 0;
 //Here you can set the strength on the 6 diffrent pulses the IR sensor sends out
 uint16_t levels[] = { 1, 1, 3, 3, 5, 5 };
 
-int threshold[NUM_SENSORS] = {400, 400, 400}; // White threshold, white return values lower than this
+int threshold[NUM_SENSORS] = {400, 400, 400, 400, 400}; // White threshold, white return values lower than this
 LineSensorsWhite sensorsState = {0, 0, 0}; // populate the struct with false values ( 0 ), like sensorsState = {false,false,false,false,false};​
 
 uint32_t turnAngle = 0;
@@ -65,17 +67,20 @@ void setup() {
 
   //set up the lcd
   countCans();
-
+lcd.clear();
+delay(3000);
 }
 
 void loop() {
 
 //Kører frem til linjen op stopper
-//driveToLine();
-
+stage1();
+//driveToLineLCRC;
 //Christoffer kode indsættes for at blive ført til sensor
-
+while(true)
+{
 sortCans();
+}
 }
 
 
@@ -86,9 +91,13 @@ void readSensors(LineSensorsWhite &state) {
   sensorsState = {false, false, false};
   if ( lineSensorValues[0] < threshold[0])
     sensorsState.L = true;
-  if ( lineSensorValues[1] < threshold[1])
+  if ( lineSensorValues[1] < threshold[0])
+    sensorsState.LC = true;
+  if ( lineSensorValues[2] < threshold[1])
     sensorsState.C = true;
-  if ( lineSensorValues[2] < threshold[2])
+  if ( lineSensorValues[3] < threshold[0])
+    sensorsState.RC = true;
+  if ( lineSensorValues[4] < threshold[2])
     sensorsState.R = true;
 }
 
@@ -104,17 +113,17 @@ void depositLargeCan() {
   while (completed == true) {
     readSensors(sensorsState);
     checkWhiteBack();
+    lcd.print("ASS");
   }
 }
-
 void driveToLine() {
   motors.setSpeeds(105, 100);
   delay(500);
   while (completed == false) {
     readSensors(sensorsState);
     checkWhiteForward();
-    completed = false;
   }
+completed = false;
 }
 
 void checkWhiteBack() {
@@ -183,7 +192,7 @@ void sortCans() {
       depositLargeCan();
 
 
-      delay(2000);
+      
 
       break;
 
@@ -200,7 +209,7 @@ void sortCans() {
       countCans();
       
 
-      delay(2000);
+      
 
       break;
 
@@ -212,7 +221,7 @@ void sortCans() {
 
       //This delay set how long the linesensors is on for, between tjeks on the proxsimitysensor.
       //It controlles how long the belt should run for
-      delay(1000);
+      delay(500);
 
       break;
 
@@ -321,7 +330,6 @@ void turnSensorSetup()
   lcd.clear();
 
 
-
 }
 
 
@@ -394,7 +402,7 @@ void stage4DriveToCan() {
   turnTo(-90); //Drejer 90 grader til højre
   distDrive(25); //køre 25 cm
   turnTo(90);//Drejer 90 grader til venstre
-  distDrive(18);// køre 18 cm
+  distDrive(22);// køre 18 cm
   turnTo(90); // Drejer 90 grader til venstre 
   //Stop(); //stopper i 5 s
 }
@@ -408,9 +416,53 @@ void returnAfterDeposit(){
   turnTo(-180);
   distDrive(45);
   turnTo(-90);
-  distDrive(20);
+  distDrive(26);
   turnTo(-90);
+  stage1();
   lcd.clear();
   lcd.print("Done");
-  delay(30000);
+}
+
+void driveToLineLCRC() {
+  motors.setSpeeds(105, 100);
+  delay(500);
+  while (completed == false) {
+    readSensors(sensorsState);
+    checkWhiteForwardLCRC();
+  }
+completed = false;
+}
+
+void checkWhiteForwardLCRC() {
+
+  if (sensorsState.LC == false && sensorsState.RC == false) {
+    motors.setSpeeds(105, 100);
+  }
+  else {
+    motors.setSpeeds(0, 0);
+    completed = true;
+  }
+}
+
+void lineFollow(){
+  readSensors(sensorsState);
+if(sensorsState.LC == true && sensorsState.C == true){
+    motors.setSpeeds(100,300);
+
+} else if (sensorsState.C== true && sensorsState.RC== true){
+    motors.setSpeeds(300,100);
+} else {
+    motors.setSpeeds(100, 100);
+}
+Serial.println("L: " + (String)sensorsState.L + " LC: " + (String)sensorsState.LC + " C: " + (String)sensorsState.C + " RC: " + (String)sensorsState.RC) + "R: " + (String)sensorsState.R;
+}
+
+void stage1()
+{
+  driveToLine();
+distDrive(6);
+turnTo(-90);
+  readSensors(sensorsState);
+while(sensorsState.LC == false || sensorsState.RC == false) lineFollow();
+motors.setSpeeds(0,0);
 }
