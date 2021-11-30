@@ -66,21 +66,22 @@ void setup() {
   turnSensorReset();
 
   //set up the lcd
+  lcd.clear();
   countCans();
   //lcd.clear();
-delay(3000);
+  delay(3000);
 }
 
 void loop() {
 
-//Kører frem til linjen op stopper
-stage1();
-//driveToLineLCRC;
-//Christoffer kode indsættes for at blive ført til sensor
-while(true)
-{
-sortCans();
-}
+  //Kører frem til linjen op stopper
+  stage1();
+  //driveToLineLCRC;
+  //Christoffer kode indsættes for at blive ført til sensor
+  while (true)
+  {
+    sortCans();
+  }
 }
 
 
@@ -123,7 +124,7 @@ void driveToLine() {
     readSensors(sensorsState);
     checkWhiteForward();
   }
-completed = false;
+  completed = false;
 }
 
 void checkWhiteBack() {
@@ -192,7 +193,7 @@ void sortCans() {
       depositLargeCan();
 
 
-      
+
 
       break;
 
@@ -201,15 +202,15 @@ void sortCans() {
       //Don't turn linesensors on before the zumo has left the sensor that controlles the belt
 
       //add one count to small can and updates the lcd screen
+      smallCan = smallCan + 1;
+      countCans();
       imustart();
       stage4DriveToCan();
       driveToLine();
       returnAfterDeposit();
-      smallCan = smallCan + 1;
-      countCans();
-      
 
-      
+
+
 
       break;
 
@@ -235,14 +236,12 @@ void countCans() {
   lcd.setCursor(0, 0);
   lcd.print("Large:");
   lcd.setCursor(6, 0);
-  lcd.clear();
   lcd.print(largeCan);
 
   //counts the small cans
   lcd.setCursor(0, 1);
   lcd.print("Small:");
   lcd.setCursor(6, 1);
-  lcd.clear();
   lcd.print(smallCan);
 
 }
@@ -250,18 +249,18 @@ void turnTo(int angle)
 {
   bool done = false;
   int f = 1;
-  if(angle<0) f = -1; 
-  while(done==false)
+  if (angle < 0) f = -1;
+  while (done == false)
   {
-    if(turnAngleDegrees >= angle && angle + 1>= turnAngleDegrees)
+    if (turnAngleDegrees >= angle && angle + 1 >= turnAngleDegrees)
     {
       motors.setSpeeds(0, 0);
-      done=true;
+      done = true;
       imustart();
     }
     else
     {
-      motors.setSpeeds(f*-100, f*100);
+      motors.setSpeeds(f * -100, f * 100);
       imustart();
     }
   }
@@ -374,24 +373,24 @@ void distDrive(double dist) {
   resetEncoders();
   int f = 1;
   if (dist < 0) f = -1;
-    
-    count = dist*78.5; //Don't ask, it just works
-    //lcd.gotoXY(0,0);
-    //lcd.print("Driving");
-    //lcd.gotoXY(0,1);
-    //lcd.print((String)dist + " cm");
 
-    
-    while(f*encoders.getCountsRight()< f*count) {   
-      motors.setSpeeds(f*100,f*100);
-      if(encoders.getCountsRight()*1.01 > encoders.getCountsLeft()){
-        motors.setSpeeds(f*300,f*100);
-      } else if (encoders.getCountsRight()*1.01 < encoders.getCountsLeft()){
-        motors.setSpeeds(f*100,f*300);
-      }
-    } 
-    motors.setSpeeds(0, 0);
-    //lcd.clear();
+  count = dist * 78.5; //Don't ask, it just works
+  //lcd.gotoXY(0,0);
+  //lcd.print("Driving");
+  //lcd.gotoXY(0,1);
+  //lcd.print((String)dist + " cm");
+
+
+  while (f * encoders.getCountsRight() < f * count) {
+    motors.setSpeeds(f * 100, f * 100);
+    if (encoders.getCountsRight() * 1.01 > encoders.getCountsLeft()) {
+      motors.setSpeeds(f * 300, f * 100);
+    } else if (encoders.getCountsRight() * 1.01 < encoders.getCountsLeft()) {
+      motors.setSpeeds(f * 100, f * 300);
+    }
+  }
+  motors.setSpeeds(0, 0);
+  //lcd.clear();
 }
 
 void resetEncoders() {
@@ -403,16 +402,16 @@ void stage4DriveToCan() {
   distDrive(25); //køre 25 cm
   turnTo(90);//Drejer 90 grader til venstre
   distDrive(22);// køre 18 cm
-  turnTo(90); // Drejer 90 grader til venstre 
+  turnTo(90); // Drejer 90 grader til venstre
   //Stop(); //stopper i 5 s
 }
 
-void Stop(){
+void Stop() {
   motors.setSpeeds(0, 0);
   delay(5000);
 }
 
-void returnAfterDeposit(){
+void returnAfterDeposit() {
   turnTo(-180);
   distDrive(45);
   turnTo(-90);
@@ -430,7 +429,7 @@ void driveToLineLCRC() {
     readSensors(sensorsState);
     checkWhiteForwardLCRC();
   }
-completed = false;
+  completed = false;
 }
 
 void checkWhiteForwardLCRC() {
@@ -444,25 +443,25 @@ void checkWhiteForwardLCRC() {
   }
 }
 
-void lineFollow(){
+void lineFollow() {
   readSensors(sensorsState);
-if(sensorsState.LC == true && sensorsState.C == true){
-    motors.setSpeeds(100,300);
+  if (sensorsState.LC == true && sensorsState.C == true) {
+    motors.setSpeeds(100, 300);
 
-} else if (sensorsState.C== true && sensorsState.RC== true){
-    motors.setSpeeds(300,100);
-} else {
+  } else if (sensorsState.C == true && sensorsState.RC == true) {
+    motors.setSpeeds(300, 100);
+  } else {
     motors.setSpeeds(100, 100);
-}
-Serial.println("L: " + (String)sensorsState.L + " LC: " + (String)sensorsState.LC + " C: " + (String)sensorsState.C + " RC: " + (String)sensorsState.RC) + "R: " + (String)sensorsState.R;
+  }
+  Serial.println("L: " + (String)sensorsState.L + " LC: " + (String)sensorsState.LC + " C: " + (String)sensorsState.C + " RC: " + (String)sensorsState.RC) + "R: " + (String)sensorsState.R;
 }
 
 void stage1()
 {
   driveToLine();
-distDrive(6);
-turnTo(-90);
+  distDrive(6);
+  turnTo(-90);
   readSensors(sensorsState);
-while(sensorsState.LC == false || sensorsState.RC == false) lineFollow();
-motors.setSpeeds(0,0);
+  while (sensorsState.LC == false || sensorsState.RC == false) lineFollow();
+  motors.setSpeeds(0, 0);
 }
