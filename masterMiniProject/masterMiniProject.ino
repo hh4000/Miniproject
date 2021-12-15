@@ -144,26 +144,22 @@ void readSensors(LineSensorsWhite &state) {
 }
 
 void depositLargeCan() {
-  motors.setSpeeds(105, 100);
-  delay(500);
-  while (completed == false) {
-    readSensors(sensorsState);
-    checkWhiteForward();
-  }
-  motors.setSpeeds(-105, -100);
-  delay(500);
-  while (completed == true) {
-    readSensors(sensorsState);
-    checkWhiteBack(); 
-  }
+  driveToLine(true);
+  driveToLine(false); 
 }
-void driveToLine() {
-
-  motors.setSpeeds(105, 100);
+void driveToLine(bool forwards) {//true if forwards - false if backwards
+  int f = 1;
+  if(forwards == false) f = -1;
+  motors.setSpeeds(f*105, f*100);
   delay(500);
   while (completed == false) {
     readSensors(sensorsState);
-    checkWhiteForward();
+    if(forwards = true){
+      checkWhiteForward();
+    } else {
+      checkWhiteBack();
+    }
+    
   }
 completed = false;
 }
@@ -242,7 +238,7 @@ void sortCans() {
       //add one count to small can and updates the lcd screen
       imuUpdate();
       stage4DriveToCan();
-      driveToLine();
+      driveToLine(true);
       returnAfterDeposit();
       smallCan = smallCan + 1;
       countCans();
@@ -465,7 +461,7 @@ Serial.println("L: " + (String)sensorsState.L + " LC: " + (String)sensorsState.L
 
 void stage1()
 {
-  driveToLine();
+  driveToLine(true);
 distDrive(6);
 turnTo(-90);
 delay(200);
