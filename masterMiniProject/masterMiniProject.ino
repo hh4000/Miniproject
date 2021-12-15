@@ -240,7 +240,7 @@ void sortCans() {
       stage4DriveToCan();
       driveToLine(true);
       returnAfterDeposit();
-      smallCan = smallCan + 1;
+      smallCan++;
       countCans();
       break;
 
