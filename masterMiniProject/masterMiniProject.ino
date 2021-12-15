@@ -165,12 +165,12 @@ completed = false;
 }
 
 void checkWhiteBack() {
-  if (sensorsState.L == false && sensorsState.C == false && sensorsState.R == false) {
+  if (sensorsState.L == false || sensorsState.R == false) {
     motors.setSpeeds(-105, -100);
   }
   else {
     motors.setSpeeds(0, 0);
-    completed = false;
+    completed = true;
   }
 }
 
