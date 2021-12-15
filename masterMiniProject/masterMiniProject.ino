@@ -32,7 +32,6 @@ int threshold[NUM_SENSORS] = {400, 400, 100, 400, 400}; // White threshold, whit
 LineSensorsWhite sensorsState = {0, 0, 0, 0, 0}; // populate the struct with false values ( 0 ), like sensorsState = {false,false,false,false,false};​
 
 uint32_t turnAngle = 0;
-int turnAngle2 = turnAngle;
 // turnRate is the current angular rate of the gyro, in units of
 // 0.07 degrees per second.
 int16_t turnRate;
@@ -58,18 +57,7 @@ double EncoderCount = 0;
 
 void calibrateLineSensor(){
   int tempThreshold[NUM_SENSORS];
-  /*
-  lcd.gotoXY(0,0);
-  lcd.print("On black");
-  lcd.gotoXY(0,1);
-  lcd.print("press A");
-  buttonA.waitForPress();
-  lcd.clear();
-  delay(1000);
-  readSensors(sensorsState);
-  for(int i = 0; i < NUM_SENSORS; i++) tempThreshold[i] = lineSensorValues[i]/3;
-  */
-
+  
   lcd.print("On white");
   lcd.gotoXY(0,1);
   lcd.print("Press A");
@@ -78,8 +66,10 @@ void calibrateLineSensor(){
   delay(1000);
   for(int i = 0; i < 10; i++){
     readSensors(sensorsState);
-    for(int j = 0; j < NUM_SENSORS; j++){ tempThreshold[j] += lineSensorValues[j]*4;
-      Serial.println("L: " + (String)lineSensorValues[0] + ". LC: " + (String)lineSensorValues[1] + ". C: " + (String)lineSensorValues[2] + ". RC: " + (String)lineSensorValues[3] + ". R: " + (String)lineSensorValues[4]);}
+    for(int j = 0; j < NUM_SENSORS; j++){ 
+      tempThreshold[j] += lineSensorValues[j]*4;
+      Serial.println("L: " + (String)lineSensorValues[0] + ". LC: " + (String)lineSensorValues[1] + ". C: " + (String)lineSensorValues[2] + ". RC: " + (String)lineSensorValues[3] + ". R: " + (String)lineSensorValues[4]);
+    }
     lcd.gotoXY(0,0);
     lcd.print("cal. No" + (String)i);  
     delay(200);
@@ -118,20 +108,20 @@ void setup() {
   lcd.clear();
   delay(3000);
   calibrateLineSensor();
+  //Kører frem til linjen op stopper
+    readSensors(sensorsState);
+    Serial.println("L: " + (String)lineSensorValues[0] + ". LC: " + (String)lineSensorValues[1] + ". C: " + (String)lineSensorValues[2] + ". RC: " + (String)lineSensorValues[3] + ". R: " + (String)lineSensorValues[4]);
+  stage1();
 }
 
 void loop() {
   readSensors(sensorsState);
-Serial.println("L: " + (String)lineSensorValues[0] + ". LC: " + (String)lineSensorValues[1] + ". C: " + (String)lineSensorValues[2] + ". RC: " + (String)lineSensorValues[3] + ". R: " + (String)lineSensorValues[4]);
 
-//Kører frem til linjen op stopper
-stage1();
-//driveToLineLCRC;
+
+
 //Christoffer kode indsættes for at blive ført til sensor
-while(true)
-{
 sortCans();
-}
+
 }
 
 
@@ -164,8 +154,7 @@ void depositLargeCan() {
   delay(500);
   while (completed == true) {
     readSensors(sensorsState);
-    checkWhiteBack();
-    lcd.print("ASS");
+    checkWhiteBack(); 
   }
 }
 void driveToLine() {
@@ -211,13 +200,13 @@ void proxSensor() {
 
   //This determance if there is a can in front of the zumo and if there is, then the size of it
   //It uses the data from the IR sensor, to determan how close the can is
-  if (proxSensors.countsFrontWithLeftLeds() and proxSensors.countsFrontWithRightLeds() > 2
-      and proxSensors.countsFrontWithLeftLeds() and proxSensors.countsFrontWithRightLeds() <= 4 ) {
-    cans = 2;
+  if (proxSensors.countsFrontWithLeftLeds() > 2 and proxSensors.countsFrontWithRightLeds() > 2
+      and proxSensors.countsFrontWithLeftLeds()<=4 and proxSensors.countsFrontWithRightLeds() <= 4 ) {
+    cans = 2;//lille dåse
 
   }
   else if (proxSensors.countsFrontWithLeftLeds() and proxSensors.countsFrontWithRightLeds() >= 5 ) {
-    cans = 1;
+    cans = 1;//stor dåse
 
   }
   else {
@@ -244,10 +233,6 @@ void sortCans() {
       largeCan++;
       countCans();
       depositLargeCan();
-
-
-      
-
       break;
 
     case 2:
@@ -255,16 +240,12 @@ void sortCans() {
       //Don't turn linesensors on before the zumo has left the sensor that controlles the belt
 
       //add one count to small can and updates the lcd screen
-      imustart();
+      imuUpdate();
       stage4DriveToCan();
       driveToLine();
       returnAfterDeposit();
       smallCan = smallCan + 1;
       countCans();
-      
-
-      
-
       break;
 
     default:
@@ -273,7 +254,7 @@ void sortCans() {
       //This turns the linesensors back on, so the belt runs again
       lineSensors.emittersOn();
 
-      //This delay set how long the linesensors is on for, between tjeks on the proxsimitysensor.
+      //This delay set how long the linesensors is on for, between checks on the proxsimitysensor.
       //It controlles how long the belt should run for
       delay(500);
 
@@ -311,12 +292,12 @@ void turnTo(int angle)
     {
       motors.setSpeeds(0, 0);
       done=true;
-      imustart();
+      imuUpdate();
     }
     else
     {
       motors.setSpeeds(f*-100, f*100);
-      imustart();
+      imuUpdate();
     }
   }
   turnSensorReset();
@@ -327,7 +308,7 @@ void turnTo(int angle)
 
 
 ///This is important for the turn sensor and the lcd screen.
-void imustart()
+void imuUpdate()
 {
   turnSensorUpdate();
   turnAngleDegrees = ((((int32_t)turnAngle >> 16) * 360) >> 16);
@@ -380,7 +361,6 @@ void turnSensorSetup()
   gyroOffset = total / 1024;
 
   // Display the angle (in degrees from -180 to 180) until the
-  // user presses A.
   lcd.clear();
 
 
@@ -429,7 +409,7 @@ void distDrive(double dist) {
   int f = 1;
   if (dist < 0) f = -1;
     
-    count = dist*78.5; //Don't ask, it just works
+    count = dist*78.5; //Don't ask, it just works - is equal to 900/(pi*d) where d is the diameter of the wheels (of 3.65 cm)
     lcd.gotoXY(0,0);
     lcd.print("Driving");
     lcd.gotoXY(0,1);
@@ -456,47 +436,20 @@ void stage4DriveToCan() {
   turnTo(-90); //Drejer 90 grader til højre
   distDrive(25); //køre 25 cm
   turnTo(90);//Drejer 90 grader til venstre
-  distDrive(22);// køre 18 cm
+  distDrive(22);// køre 22 cm
   turnTo(90); // Drejer 90 grader til venstre 
-  //Stop(); //stopper i 5 s
 }
 
-void Stop(){
-  motors.setSpeeds(0, 0);
-  delay(5000);
-}
 
 void returnAfterDeposit(){
-  turnTo(-180);
-  distDrive(45);
-  turnTo(-90);
-  distDrive(26);
-  turnTo(-90);
-  stage1();
-  lcd.clear();
-  lcd.print("Done");
+  turnTo(-180);// turn around
+  distDrive(45); // drive 45 cm
+  turnTo(-90); // turn -90
+  distDrive(26); //drive 26 cm
+  turnTo(-90); // turn -90
+  stage1(); //when back at starting position (ca.) stage 1
 }
 
-void driveToLineLCRC() {
-  motors.setSpeeds(105, 100);
-  delay(500);
-  while (completed == false) {
-    readSensors(sensorsState);
-    checkWhiteForwardLCRC();
-  }
-completed = false;
-}
-
-void checkWhiteForwardLCRC() {
-
-  if (sensorsState.LC == false && sensorsState.RC == false) {
-    motors.setSpeeds(105, 100);
-  }
-  else {
-    motors.setSpeeds(0, 0);
-    completed = true;
-  }
-}
 
 void lineFollow(){
   readSensors(sensorsState);
