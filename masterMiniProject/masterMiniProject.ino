@@ -56,6 +56,7 @@ bool turned90       = false;
 double EncoderCount = 0;
 
 void calibrateLineSensor(){
+  //temporary array. data copied into 
   int tempThreshold[NUM_SENSORS];
   
   lcd.print("On white");
